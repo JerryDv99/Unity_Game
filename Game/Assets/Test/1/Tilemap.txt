@@ -1,0 +1,80 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+
+public class TileMapController : MonoBehaviour, IPointerDownHandler
+{
+    [SerializeField] private GameObject Grass;
+    [SerializeField] private GameObject GreenGrass;
+
+    [SerializeField] private Sprite GrassSprite;
+    [SerializeField] private Sprite GreenGrassSprite;
+
+    [SerializeField] private GameObject Backboard;
+    private RectTransform BackboardRect;
+
+    [Range(1, 10)]
+    [SerializeField] private int X_Count = 1;
+
+    [Range(1, 10)]
+    [SerializeField] private int Y_Count = 1;
+
+    private List<GameObject> TileList = new List<GameObject>();
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        int iX = (int)Input.mousePosition.x / 64;
+        int iY = (int)Input.mousePosition.y / 64;
+
+        int eventDataX = (int)eventData.position.x / 64;
+        int eventDataY = (int)eventData.position.y / 64;
+
+        int index = (int)(iY * X_Count + iX);
+
+        GameObject temp = TileList[index];
+
+        Image img = temp.GetComponent<Image>();
+
+        img.sprite = GreenGrassSprite;
+    }
+
+    void Start()
+    {
+        BoxCollider2D Coll = this.gameObject.AddComponent<BoxCollider2D>();
+
+        float fX = X_Count * 64;
+        float fY = Y_Count * 64;
+
+        Coll.size = new Vector2(fX, fY);
+        Coll.offset = new Vector2(fX * 0.5f, fY * 0.5f );
+
+        BackboardRect = Backboard.GetComponent<RectTransform>();
+
+
+        //=================================================================================================
+        //=================================================================================================
+
+
+        for (int y = 0; y < Y_Count; ++y)
+        {
+            for (int x = 0; x < X_Count; ++x)
+            {
+                GameObject Obj = Instantiate(Grass);
+
+                RectTransform ObjectRect = Obj.GetComponent<RectTransform>();
+
+                ObjectRect.sizeDelta = new Vector2(64, 64);
+
+                ObjectRect.localPosition = new Vector3(
+                    x * ObjectRect.sizeDelta.x + 32, 
+                    y * ObjectRect.sizeDelta.y + 32);
+
+                Obj.transform.parent = transform;
+                TileList.Add(Obj);
+            }
+        }
+    }
+}

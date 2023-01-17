@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         camera = transform.GetChild(1).gameObject.GetComponent<Camera>();
-        fpscamera = transform.GetChild(2).gameObject;
         Anim = transform.GetComponent<Animator>();
     }
     void Start()
