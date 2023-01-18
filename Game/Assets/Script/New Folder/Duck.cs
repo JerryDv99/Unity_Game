@@ -18,6 +18,15 @@ public class Duck : MonoBehaviour
         {
             Instantiate(Quack, this.transform.position, Quaternion.identity);
             b = true;
+            StartCoroutine(DestroyQ());
+        }
+    }
+
+    IEnumerator DestroyQ()
+    {
+        yield return new WaitForSeconds(2.0f);
+        {
+            
         }
     }
 }

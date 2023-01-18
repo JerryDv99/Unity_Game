@@ -5,24 +5,30 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public Camera camera;
+    public GameObject pPrefabWalk = null;
+
+    private ObjectPool pPool;
+
+    private Queue<GameObject> pWalkQueue = new Queue<GameObject>();
+
+
+    public Camera cam;
     public GameObject fpscamera;
 
     public Animator Anim;
 
     const int Idle = 0;
     const int Walk = 1;
-    const int Run = 2;
-    const int Bend = 3;
-    const int Hide = 4;
-    const int Fight = 5;
+    const int Bend = 2;
+    const int Hide = 3;
+    const int Fight = 4;
 
     int Index;
     float Speed;
 
     private void Awake()
     {
-        camera = transform.GetChild(1).gameObject.GetComponent<Camera>();
+        cam = transform.GetChild(1).gameObject.GetComponent<Camera>();
         Anim = transform.GetComponent<Animator>();
     }
     void Start()
@@ -31,51 +37,58 @@ public class PlayerController : MonoBehaviour
         Speed = 0.0f;
         
         fpscamera.SetActive(false);
+
+        GameObject obj = new GameObject();
+        obj.transform.SetParent(this.transform);
+        obj.name = typeof(ObjectPool).Name;
+        this.pPool = obj.AddComponent<ObjectPool>();
+        this.pPool.Initialize(this.pPrefabWalk);
     }
 
-    
+
     void Update()
     {
-        switch(Index)
+        switch (Index)
         {
             case Idle:
                 Speed = 0.0f;
+                Anim.SetBool("Idle", true);
                 break;
             case Walk:
+                Anim.SetBool("Walk", true);
                 Speed = 3.0f;
                 break;
-            case Run:
-                Speed = 7.0f;
-                break;
             case Bend:
+                Anim.SetBool("Bend", true);
                 Speed = 1.5f;
                 break;
             case Hide:
+                Anim.SetBool("Hide", true);
                 Speed = 0.0f;
                 break;
             case Fight:
+                Anim.SetBool("Fight", true);
                 Speed = 0.0f;
                 break;
         }
 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S)
             || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+        {
             Index = Walk;
+            Anim.SetBool("Idle", false);
+        }
+
+
 
         if ((Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) ||
             Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
             && !(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)
             || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+        {
             Index = Idle;
-
-        if (Input.mousePosition.x < 300)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
-        else if (Input.mousePosition.x > 1620)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (90 * Time.deltaTime), 0.0f);
-        else if (Input.mousePosition.x < 700)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (45 * Time.deltaTime), 0.0f);
-        else if (Input.mousePosition.x > 1220)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (45 * Time.deltaTime), 0.0f);
+            Anim.SetBool("Walk", false);
+        }
 
         if (Input.GetKeyDown(KeyCode.V))
         {
@@ -84,9 +97,45 @@ public class PlayerController : MonoBehaviour
             else
                 fpscamera.SetActive(false);
         }
-            
-        
-        
+
+        if (Input.mousePosition.x < 300)
+            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
+        if (Input.mousePosition.x > 1620)
+            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (90 * Time.deltaTime), 0.0f);
+        if (Input.mousePosition.x < 700)
+            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (45 * Time.deltaTime), 0.0f);
+        if (Input.mousePosition.x > 1220)
+            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (45 * Time.deltaTime), 0.0f);
+
+
+        int cntLoop = 0;
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¿À¸¥¹ß"))
+        {
+            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
+                        
+            if (currentState >= 0.95f && normalizedTime > cntLoop)
+            {
+                GameObject walk = this.pPool.GetQueue();
+                this.pWalkQueue.Enqueue(walk);
+                this.StartCoroutine(DeleteWalk());
+                cntLoop += 1;
+            }
+        }
+        int cntLoop2 = 0;
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¿Þ¹ß"))
+        {
+            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
+                        
+            if (currentState >= 0.95f && normalizedTime > cntLoop2)
+            {
+                GameObject walk = this.pPool.GetQueue();
+                this.pWalkQueue.Enqueue(walk);
+                this.StartCoroutine(DeleteWalk());
+                cntLoop2 += 1;
+            }
+        }
 
         /*
         
@@ -131,12 +180,6 @@ public class PlayerController : MonoBehaviour
 
         transform.Translate(move);
         transform.Translate(moveAmout);
-        Debug.Log(Input.mousePosition);
-        
-
-        
-
-        
 
         
 
@@ -144,5 +187,18 @@ public class PlayerController : MonoBehaviour
 
 
 
+    }
+
+    IEnumerator DeleteWalk()
+    {
+        yield return new WaitForSeconds(1.0f);
+
+        if (this.pWalkQueue.Count != 0)
+        {
+            this.pPool.InsertQueue(this.pWalkQueue.Dequeue(), this.transform);
+
+            yield return null;
+        }
+        yield return null;
     }
 }
