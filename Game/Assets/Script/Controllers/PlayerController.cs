@@ -109,34 +109,34 @@ public class PlayerController : MonoBehaviour
 
 
         int cntLoop = 0;
-        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¿À¸¥¹ß"))
+        int cntLoop2 = 0;
+       
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¿Þ¹ß"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
                         
             if (currentState >= 0.95f && normalizedTime > cntLoop)
             {
-                GameObject walk = this.pPool.GetQueue();
+                GameObject walk = this.pPool.GetQueue(this.transform);
                 this.pWalkQueue.Enqueue(walk);
                 this.StartCoroutine(DeleteWalk());
                 cntLoop += 1;
             }
         }
-        int cntLoop2 = 0;
-        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¿Þ¹ß"))
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¿À¸¥¹ß"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
-                        
+
             if (currentState >= 0.95f && normalizedTime > cntLoop2)
             {
-                GameObject walk = this.pPool.GetQueue();
+                GameObject walk = this.pPool.GetQueue(this.transform);
                 this.pWalkQueue.Enqueue(walk);
                 this.StartCoroutine(DeleteWalk());
                 cntLoop2 += 1;
             }
         }
-
         /*
         
         Vector3 mPosition = Input.mousePosition;
@@ -195,7 +195,7 @@ public class PlayerController : MonoBehaviour
 
         if (this.pWalkQueue.Count != 0)
         {
-            this.pPool.InsertQueue(this.pWalkQueue.Dequeue(), this.transform);
+            this.pPool.InsertQueue(this.pWalkQueue.Dequeue());
 
             yield return null;
         }
