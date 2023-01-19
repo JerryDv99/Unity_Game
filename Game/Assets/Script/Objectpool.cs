@@ -11,7 +11,7 @@ public class ObjectPool : MonoBehaviour
     public void Initialize(GameObject _pPrefabObj)
     {
         this.pPrefabObj = _pPrefabObj;
-        for(int i = 0; i < 14; i++)
+        for(int i = 0; i < 4; i++)
         {
             GameObject obj = Instantiate(_pPrefabObj, this.transform);
             pQueue.Enqueue(obj);

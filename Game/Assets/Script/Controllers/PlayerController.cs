@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
 
     private Queue<GameObject> pWalkQueue = new Queue<GameObject>();
 
+    private MyFieldOfView View;
 
     public Camera cam;
     public GameObject fpscamera;
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
     {
         cam = transform.GetChild(1).gameObject.GetComponent<Camera>();
         Anim = transform.GetComponent<Animator>();
+        View = transform.GetComponent<MyFieldOfView>();
     }
     void Start()
     {
@@ -98,6 +100,11 @@ public class PlayerController : MonoBehaviour
                 fpscamera.SetActive(false);
         }
 
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Anim.SetBool("Attack", true);
+        }
+
         if (Input.mousePosition.x < 300)
             transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
         if (Input.mousePosition.x > 1620)
@@ -137,6 +144,17 @@ public class PlayerController : MonoBehaviour
                 cntLoop2 += 1;
             }
         }
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 내려찍기"))
+        {
+            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
+
+            if (currentState >= 0.95f)            
+                Anim.SetBool("Attack", false);
+            
+        }
+
+
         /*
         
         Vector3 mPosition = Input.mousePosition;
@@ -201,4 +219,23 @@ public class PlayerController : MonoBehaviour
         }
         yield return null;
     }
+    /*
+    private void OnTriggerStay(Collider other)
+    {
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 내려찍기"))
+        {
+            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
+
+            if (currentState >= 0.55f)
+            {
+                EnemyController Enemy = other.gameObject.GetComponent<EnemyController>();
+                if (Enemy.GetIndex() != 4)
+                {
+                    Enemy.SetIndex(6);
+                }
+            }
+        }
+    }
+    */
 }
