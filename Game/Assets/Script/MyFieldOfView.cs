@@ -12,7 +12,7 @@ public class MyFieldOfView : MonoBehaviour
     [Range(20, 200)]
     public int Count;
 
-    [Range(10.0f, 50.0f)]
+    [Range(1.0f, 50.0f)]
     public float Radius;
 
     [SerializeField] private LayerMask Mask;
@@ -53,26 +53,26 @@ public class MyFieldOfView : MonoBehaviour
     {
         Angle = 30.0f;
         Count = 25;
-        Radius = 5.0f;
+        Radius = 3.0f;
     }
 
     private void Update()
     {
         // 부채꼴 시야
         FiledOfView();
-        
+
         // 중심점으로부터 Radius 만큼의 거리를 확인하여 TargetMask를 모두 찾는다
         Collider[] CollObj = Physics.OverlapSphere(transform.position, Radius, TargetMask);
 
         TargetList.Clear();
 
-        foreach(Collider coll in CollObj)
+        foreach (Collider coll in CollObj)
         {
             // TargetMask의 모든 Target과의 방향을 구함
             Vector3 Direction = (coll.transform.position - transform.position).normalized;
 
             // 시야 범위에 들어온 Target을 걸러낸다 
-            if(Vector3.Angle(transform.forward, Direction) < Angle)
+            if (Vector3.Angle(transform.forward, Direction) < Angle)
             {
                 // 거리
                 float fDistance = Vector3.Distance(transform.position, coll.transform.position);
@@ -82,6 +82,26 @@ public class MyFieldOfView : MonoBehaviour
                     TargetList.Add(coll.transform); // 최종적으로 남은 객체를 추가
             }
         }
+
+        if(this.tag == "Enemy")
+        {
+            if(TargetList.Count != 0)
+            {
+                if (TargetList.Find(x => x.transform).gameObject.tag == "Player")
+                    this.transform.GetComponent<EnemyController>().SetTarget(TargetList.Find(x => x.transform).gameObject);
+            }            
+        }
+
+        if(this.tag == "Player")
+        {
+            if (TargetList.Count != 0)
+            {
+                if (TargetList.Find(x => x.transform).gameObject.tag == "Enemy")
+                    this.transform.GetComponent<PlayerController>().SetTarget(TargetList.Find(x => x.transform).gameObject);
+            }            
+        }
+        
+        
     }
 
     public void FiledOfView()

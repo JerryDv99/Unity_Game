@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5181881864565048961}
   - component: {fileID: 4453529225904996287}
+  - component: {fileID: 4462214175170980666}
   m_Layer: 0
   m_Name: Quack
   m_TagString: Untagged
@@ -43,5 +44,17 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 10
+  m_Radius: 20
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4462214175170980666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3993275106953527213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2de22a213a958194095824f4ef20222c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

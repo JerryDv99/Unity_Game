@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectPool : MonoBehaviour
+public class ObjectPool : SingletonManager<ObjectPool>
 {
     private GameObject pPrefabObj = null;
 

@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public GameObject pPrefabWalk = null;
+    public GameObject Target = null;
 
     private ObjectPool pPool;
 
@@ -23,7 +24,9 @@ public class PlayerController : MonoBehaviour
     const int Bend = 2;
     const int Hide = 3;
     const int Fight = 4;
+    const int Die = 5;
 
+    [SerializeField] int HP;
     int Index;
     float Speed;
 
@@ -37,7 +40,7 @@ public class PlayerController : MonoBehaviour
     {
         Index = Idle;
         Speed = 0.0f;
-        
+        HP = 100;
         fpscamera.SetActive(false);
 
         GameObject obj = new GameObject();
@@ -72,51 +75,67 @@ public class PlayerController : MonoBehaviour
                 Anim.SetBool("Fight", true);
                 Speed = 0.0f;
                 break;
+            case Die:
+                Anim.SetBool("Die", true);
+                Speed = 0.0f;
+                break;
         }
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S)
+
+        if(Index != Fight && Index != Die && Index != Hide)
+        {
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S)
             || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
-        {
-            Index = Walk;
-            Anim.SetBool("Idle", false);
+            {
+                Index = Walk;
+                Anim.SetBool("Idle", false);
+            }
+
+
+
+            if ((Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) ||
+                Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
+                && !(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)
+                || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+            {
+                Index = Idle;
+                Anim.SetBool("Walk", false);
+            }
+
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                if (fpscamera.activeInHierarchy == false)
+                    fpscamera.SetActive(true);
+                else
+                    fpscamera.SetActive(false);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Anim.SetBool("Attack", true);
+            }
+
+            if (Input.mousePosition.x < 300)
+                transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
+            if (Input.mousePosition.x > 1620)
+                transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (90 * Time.deltaTime), 0.0f);
+            if (Input.mousePosition.x < 700)
+                transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (45 * Time.deltaTime), 0.0f);
+            if (Input.mousePosition.x > 1220)
+                transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (45 * Time.deltaTime), 0.0f);
+
         }
 
-
-
-        if ((Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) ||
-            Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
-            && !(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)
-            || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+        if(Index == Fight)
         {
-            Index = Idle;
-            Anim.SetBool("Walk", false);
+            if (Input.GetKeyDown(KeyCode.Space))
+                Anim.SetBool("Attack", true);
         }
-
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            if (fpscamera.activeInHierarchy == false)
-                fpscamera.SetActive(true);
-            else
-                fpscamera.SetActive(false);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Anim.SetBool("Attack", true);
-        }
-
-        if (Input.mousePosition.x < 300)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
-        if (Input.mousePosition.x > 1620)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (90 * Time.deltaTime), 0.0f);
-        if (Input.mousePosition.x < 700)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (45 * Time.deltaTime), 0.0f);
-        if (Input.mousePosition.x > 1220)
-            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (45 * Time.deltaTime), 0.0f);
+        if (HP <= 0)
+            Index = Die;
 
 
         int cntLoop = 0;
-        int cntLoop2 = 0;
        
         if (Anim.GetCurrentAnimatorStateInfo(0).IsName("왼발"))
         {
@@ -131,28 +150,50 @@ public class PlayerController : MonoBehaviour
                 cntLoop += 1;
             }
         }
-        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("오른발"))
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 공격"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
 
-            if (currentState >= 0.95f && normalizedTime > cntLoop2)
+            if (currentState >= 0.95f && Anim.GetBool("Attack"))
             {
-                GameObject walk = this.pPool.GetQueue(this.transform);
-                this.pWalkQueue.Enqueue(walk);
-                this.StartCoroutine(DeleteWalk());
-                cntLoop2 += 1;
+                EnemyController E = Target.GetComponent<EnemyController>();
+                Anim.SetBool("Attack", false);
+                E.SetHP(E.GetHP() - 50);
+                E.Anim.SetTrigger("Hit");
             }
-        }
+            
+        }        
         if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 내려찍기"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
 
             if (currentState >= 0.95f)            
-                Anim.SetBool("Attack", false);
+                Anim.SetBool("Attack2", false);
             
         }
+
+
+        if (Target)
+        {
+            EnemyController E = Target.GetComponent<EnemyController>();
+            if (E.GetTarget() == this.gameObject)
+            {
+                Index = Fight;
+                Anim.SetBool("Walk", false);
+                Anim.SetBool("Fight", true);
+                transform.LookAt(Target.transform);
+            }
+            if (E.GetHP() <= 0)
+            {
+                Target = null;
+                Index = Idle;
+                Anim.SetBool("Fight", false);
+            }
+        }
+        
+
 
 
         /*
@@ -219,23 +260,19 @@ public class PlayerController : MonoBehaviour
         }
         yield return null;
     }
-    /*
-    private void OnTriggerStay(Collider other)
+    
+    public void SetTarget(GameObject _Obj)
     {
-        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 내려찍기"))
-        {
-            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
-            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
-
-            if (currentState >= 0.55f)
-            {
-                EnemyController Enemy = other.gameObject.GetComponent<EnemyController>();
-                if (Enemy.GetIndex() != 4)
-                {
-                    Enemy.SetIndex(6);
-                }
-            }
-        }
+        Target = _Obj;
     }
-    */
+
+    public void SetHP(int _HP)
+    {
+        HP = _HP;
+    }
+
+    public int GetHP()
+    {
+        return HP;
+    }
 }
