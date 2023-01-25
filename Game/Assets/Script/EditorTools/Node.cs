@@ -23,9 +23,4 @@ public class Node : MonoBehaviour
         yield return new WaitForSeconds(5.0f);
         coll.isTrigger = true;
     }
-
-    private void Update()
-    {
-        Debug.DrawLine(transform.position, next.transform.position, Color.blue);
-    }
 }

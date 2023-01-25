@@ -83,6 +83,7 @@ public class MyFieldOfView : MonoBehaviour
             }
         }
 
+        
         if(this.tag == "Enemy")
         {
             if(TargetList.Count != 0)
@@ -91,7 +92,8 @@ public class MyFieldOfView : MonoBehaviour
                     this.transform.GetComponent<EnemyController>().SetTarget(TargetList.Find(x => x.transform).gameObject);
             }            
         }
-
+        
+        
         if(this.tag == "Player")
         {
             if (TargetList.Count != 0)

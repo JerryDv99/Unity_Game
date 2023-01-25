@@ -8,8 +8,8 @@ public class Duck : MonoBehaviour
     
     private void OnCollisionEnter(Collision collision)
     {
-        Instantiate(Quack, this.transform.position, Quaternion.identity);
-        this.gameObject.SetActive(false);
+        if(collision.transform.tag == "Player")
+            Instantiate(Quack, this.transform.position, Quaternion.identity);        
     }
 
 }

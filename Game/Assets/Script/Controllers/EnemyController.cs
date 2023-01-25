@@ -35,12 +35,15 @@ public class EnemyController : MonoBehaviour
         {
             case 0:
                 Index = Idle;
+                Anim.SetBool("Idle", true);
                 break;
             case 1:
                 Index = Walk;
+                Anim.SetBool("Walk", true);
                 break;
             case 2:
                 Index = Sleep;
+                Anim.SetBool("Sleep", true);
                 break;
         }
         HP = 100;
@@ -62,6 +65,7 @@ public class EnemyController : MonoBehaviour
                 P.SetHP(P.GetHP() - 30);
                 if (Index == Fight)
                     StartCoroutine(Punch());
+                P.Anim.SetTrigger("Hit");
             }
         }
 
@@ -100,6 +104,7 @@ public class EnemyController : MonoBehaviour
             Index = Fight;
             Anim.SetBool("Fight", true);
             transform.LookAt(Target.transform);
+            Target.GetComponent<PlayerController>().SetTarget(this.gameObject);
             StartCoroutine(Punch());
         }
     }

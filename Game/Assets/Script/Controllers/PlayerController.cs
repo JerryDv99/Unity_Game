@@ -81,40 +81,14 @@ public class PlayerController : MonoBehaviour
                 break;
         }
 
-
-        if(Index != Fight && Index != Die && Index != Hide)
+        if(HP <= 0)
         {
-            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S)
-            || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
-            {
-                Index = Walk;
-                Anim.SetBool("Idle", false);
-            }
+            Anim.SetBool("Die", true);
+            Index = Die;
+        }
 
-
-
-            if ((Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) ||
-                Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
-                && !(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)
-                || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
-            {
-                Index = Idle;
-                Anim.SetBool("Walk", false);
-            }
-
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                if (fpscamera.activeInHierarchy == false)
-                    fpscamera.SetActive(true);
-                else
-                    fpscamera.SetActive(false);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Anim.SetBool("Attack", true);
-            }
-
+        if(Index == Idle || Index == Walk)
+        {
             if (Input.mousePosition.x < 300)
                 transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
             if (Input.mousePosition.x > 1620)
@@ -124,6 +98,21 @@ public class PlayerController : MonoBehaviour
             if (Input.mousePosition.x > 1220)
                 transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y + (45 * Time.deltaTime), 0.0f);
 
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.S)
+                || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+            {
+                Index = Walk;
+                Anim.SetBool("Idle", false);
+            }
+
+            if ((Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) ||
+                Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
+                && !(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)
+                || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)))
+            {
+                Index = Idle;
+                Anim.SetBool("Walk", false);
+            }
         }
 
         if(Index == Fight)
@@ -164,12 +153,13 @@ public class PlayerController : MonoBehaviour
                 cntLoop2 += 1;
             }
         }
+
         if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 공격"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
 
-            if (currentState >= 0.95f && Anim.GetBool("Attack"))
+            if (currentState >= 0.65f && Anim.GetBool("Attack"))
             {
                 EnemyController E = Target.GetComponent<EnemyController>();
                 Anim.SetBool("Attack", false);
@@ -206,8 +196,19 @@ public class PlayerController : MonoBehaviour
                 Anim.SetBool("Fight", false);
             }
         }
-        
 
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            if (fpscamera.activeInHierarchy == false)
+                fpscamera.SetActive(true);
+            else
+                fpscamera.SetActive(false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightShift) && Index != Bend)
+            Index = Bend;
+        if (Input.GetKeyDown(KeyCode.RightShift) && Index == Bend)
+            Index = Idle;
 
 
         /*

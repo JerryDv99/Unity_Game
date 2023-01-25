@@ -2,66 +2,46 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class NodeController : MonoBehaviour
 {
-    private Node Target;
-    private Node OldTarget;
+    [SerializeField] private Node Target;
+    [SerializeField] private Node OldTarget;
 
     public Node GetOldTarget() { return OldTarget; }
 
-    private List<GameObject> CollObjects = new List<GameObject>();
-
-    [SerializeField] private int Index;
-
-
+    public void SetTarget(Node _node)
+    {
+        OldTarget = Target;
+        Target = _node;
+    }
+       
     void Start()
     {
-        Index = 1;
-
         Transform trans = transform.parent.transform;
-        Target = trans.Find("Node_" + Index.ToString()).GetChild(0).GetComponent<Node>();
+        Target = trans.Find("NodeList").GetChild(0).GetComponent<Node>();
     }
 
     void Update()
     {
-
-
-        float fDistance = Vector3.Distance(transform.position, Target.transform.position);
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity))
+        EnemyController E = this.transform.GetComponent<EnemyController>();
+        if (E.GetIndex() == 1 || E.GetIndex() == 2)
         {
-            if (Vector3.Distance(transform.position, hit.point) <= 1.5f &&
-                !CollObjects.Contains(hit.transform.gameObject))
+            Vector3 dir = Target.transform.position - transform.position;
+
+            this.transform.position += (dir.normalized * Time.deltaTime * 2.0f);
+
+            float fDistance = Vector3.Distance(transform.position, Target.transform.position);
+
+            if (fDistance < 0.1f)
             {
-                CollObjects.Add(hit.transform.gameObject);
-                Target = NodeManager.Instance.GetNode(this.gameObject, hit);
-                //Debug.Log("???????????????");
+                OldTarget = Target;
+                Target = Target.next;
             }
-            else
-            {
-                if (fDistance < 0.1f)
-                {
-                    OldTarget = Target;
-                    Target = Target.next;
-                }
-            }
-        }
 
-        Vector3 dir = Target.transform.position - transform.position;
-
-        transform.position += (dir.normalized * Time.deltaTime * 2.0f);
-
-        Vector3 V1 = (Target.transform.position - transform.position).normalized;
-        V1.y = 0;
-        transform.LookAt(transform.position + V1);
-
-        Debug.DrawLine(transform.position, Target.transform.position, Color.red);
-
-
-        if (Target.next == null)
-            CollObjects.Clear();
-
+            Vector3 V1 = (Target.transform.position - transform.position).normalized;
+            V1.y = 0;
+            transform.LookAt(transform.position + V1);
+        }        
     }
 }
