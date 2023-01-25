@@ -11,4 +11,5 @@ public class Duck : MonoBehaviour
         Instantiate(Quack, this.transform.position, Quaternion.identity);
         this.gameObject.SetActive(false);
     }
+
 }

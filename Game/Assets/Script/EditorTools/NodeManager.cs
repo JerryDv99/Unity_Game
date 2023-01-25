@@ -147,11 +147,11 @@ public class NodeManager : SingletonManager<NodeManager>
         // VertexList 반환
         return VertexList;
     }
-    /*
+    
     public Node GetNode(GameObject Object, RaycastHit hit)
     {
         // 현재 목표지점을 받아온다.
-        TestController test = Object.GetComponent<TestController>();
+        NodeController test = Object.GetComponent<NodeController>();
         Node front = test.GetOldTarget();
 
         // 다음 목표지점을 받아온다
@@ -263,5 +263,5 @@ public class NodeManager : SingletonManager<NodeManager>
         node.next = end;
 
         return front;
-    }*/
+    }
 }

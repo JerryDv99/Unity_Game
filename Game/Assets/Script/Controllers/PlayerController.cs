@@ -136,18 +136,32 @@ public class PlayerController : MonoBehaviour
 
 
         int cntLoop = 0;
+        int cntLoop2 = 0;
        
         if (Anim.GetCurrentAnimatorStateInfo(0).IsName("왼발"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
                         
-            if (currentState >= 0.95f && normalizedTime > cntLoop)
+            if (currentState >= 0.9f && normalizedTime > cntLoop)
             {
                 GameObject walk = this.pPool.GetQueue(this.transform);
                 this.pWalkQueue.Enqueue(walk);
                 this.StartCoroutine(DeleteWalk());
                 cntLoop += 1;
+            }
+        }
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("오른발"))
+        {
+            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
+                        
+            if (currentState >= 0.9f && normalizedTime > cntLoop2)
+            {
+                GameObject walk = this.pPool.GetQueue(this.transform);
+                this.pWalkQueue.Enqueue(walk);
+                this.StartCoroutine(DeleteWalk());
+                cntLoop2 += 1;
             }
         }
         if (Anim.GetCurrentAnimatorStateInfo(0).IsName("무기 공격"))
