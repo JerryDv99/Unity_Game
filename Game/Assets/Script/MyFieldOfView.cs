@@ -32,21 +32,19 @@ public class MyFieldOfView : MonoBehaviour
         // 생성된 게임 오브젝트를 하위 객체로 지정
         Obj.transform.parent = this.transform;
         Obj.transform.position = transform.position;
+        /*
         MeshRenderer renderer = Obj.AddComponent<MeshRenderer>();
-
         meshFilter = Obj.AddComponent<MeshFilter>();
-
         // Resources에서 Material을 들고옴
         Material material = Resources.Load("Materials/Radar") as Material;
 
         Resources.Load("Materials/Radar");
 
         renderer.material = material;
-
         mesh = new Mesh();
         mesh.name = "mesh";
-
         meshFilter.mesh = mesh;
+        */
     }
 
     private void Start()
@@ -88,8 +86,17 @@ public class MyFieldOfView : MonoBehaviour
         {
             if(TargetList.Count != 0)
             {
-                if (TargetList.Find(x => x.transform).gameObject.tag == "Player")
+                GameObject P = TargetList.Find(x => x.transform).gameObject;
+                EnemyController E = this.transform.GetComponent<EnemyController>();
+                if (P.tag == "Player" && !P.GetComponent<PlayerController>().Anim.GetBool("Check"))
+                {                    
                     this.transform.GetComponent<EnemyController>().SetTarget(TargetList.Find(x => x.transform).gameObject);
+                }
+                else
+                {
+                    E.SetIndex(0);
+                    E.Anim.SetBool("Walk", false);
+                }
             }            
         }
         
@@ -145,13 +152,14 @@ public class MyFieldOfView : MonoBehaviour
                 //triangles[i * 3 + j] = (((i % 3) * (j % 3) + j) == 0 ? 0 : i + j);
                 triangles[i * 3 + j] = (((i * 3 + j) % 3) == 0 ? 0 : i + j);
         }
-
+        /*
         mesh.Clear();
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
 
         mesh.RecalculateNormals();
+        */
     }    
 }
 [CustomEditor(typeof(MyFieldOfView))]

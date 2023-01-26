@@ -9,9 +9,12 @@ public class Step : MonoBehaviour
     {
         if (other.gameObject.tag == "Enemy")
         {
-            other.gameObject.GetComponent<EnemyController>().SetIndex(1);
-            if (!create)
+            EnemyController E = other.gameObject.GetComponent<EnemyController>();
+            
+
+            if (!create && E.GetIndex() != 5)
             {
+                E.SetIndex(2);
                 GameObject Point = new GameObject("0");
 
                 Point.transform.position = this.transform.position;

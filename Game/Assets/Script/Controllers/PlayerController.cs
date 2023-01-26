@@ -16,6 +16,9 @@ public class PlayerController : MonoBehaviour
 
     public Camera cam;
     public GameObject fpscamera;
+    public GameObject tpscamera;
+    public GameObject Actioncamera;
+    public GameObject Hidecamera;
 
     public Animator Anim;
 
@@ -42,6 +45,9 @@ public class PlayerController : MonoBehaviour
         Speed = 0.0f;
         HP = 100;
         fpscamera.SetActive(false);
+        tpscamera.SetActive(false);
+        Actioncamera.SetActive(false);
+        Hidecamera.SetActive(false);
 
         GameObject obj = new GameObject();
         obj.transform.SetParent(this.transform);
@@ -68,6 +74,7 @@ public class PlayerController : MonoBehaviour
                 Speed = 1.5f;
                 break;
             case Hide:
+                Hidecamera.SetActive(true);
                 Anim.SetBool("Hide", true);
                 Speed = 0.0f;
                 break;
@@ -87,7 +94,7 @@ public class PlayerController : MonoBehaviour
             Index = Die;
         }
 
-        if(Index == Idle || Index == Walk)
+        if(Index != Fight && Index != Die && !Anim.GetBool("Hide"))
         {
             if (Input.mousePosition.x < 300)
                 transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - (90 * Time.deltaTime), 0.0f);
@@ -115,7 +122,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if(Index == Fight)
+        if (Index == Fight)
         {
             if (Input.GetKeyDown(KeyCode.Space))
                 Anim.SetBool("Attack", true);
@@ -173,11 +180,17 @@ public class PlayerController : MonoBehaviour
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
 
-            if (currentState >= 0.95f)            
+            if (currentState <= 0.7f)
+                Actioncamera.SetActive(true);
+            if (currentState >= 0.75f)
+            {
+                EnemyController E = Target.GetComponent<EnemyController>();
+                E.Anim.SetBool("Stun", true);
+                Actioncamera.SetActive(false);
                 Anim.SetBool("Attack2", false);
+            }
             
         }
-
 
         if (Target)
         {
@@ -187,7 +200,16 @@ public class PlayerController : MonoBehaviour
                 Index = Fight;
                 Anim.SetBool("Walk", false);
                 Anim.SetBool("Fight", true);
-                transform.LookAt(Target.transform);
+                if(!E.Anim.GetBool("Stun") && !E.Anim.GetBool("Die"))
+                    transform.LookAt(Target.transform);
+            }
+            if (E.GetTarget() == null)
+            {
+                if(Input.GetKeyDown(KeyCode.Space))
+                {
+                    Anim.SetBool("Attack2", true);
+
+                }
             }
             if (E.GetHP() <= 0)
             {
@@ -202,49 +224,68 @@ public class PlayerController : MonoBehaviour
             if (fpscamera.activeInHierarchy == false)
                 fpscamera.SetActive(true);
             else
-                fpscamera.SetActive(false);
+                fpscamera.SetActive(false);                        
         }
 
-        if (Input.GetKeyDown(KeyCode.RightShift) && Index != Bend)
-            Index = Bend;
-        if (Input.GetKeyDown(KeyCode.RightShift) && Index == Bend)
+        if(Anim.GetBool("Hide") && Input.GetKeyDown(KeyCode.X))
+        {
             Index = Idle;
+            Anim.SetBool("Hide", false);
+            Anim.SetBool("Idle", true);
+            Hidecamera.SetActive(false);
+            transform.rotation = Quaternion.Euler(0.0f, transform.rotation.eulerAngles.y - 180, 0.0f);
+        }
 
-
-        /*
+        if (Input.GetKeyDown(KeyCode.F))
+            Anim.SetBool("Check", false);
         
-        Vector3 mPosition = Input.mousePosition;
-        Vector3 oPosition = transform.position;
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !Anim.GetBool("Bend"))
+        {
+            Index = Bend;
+            tpscamera.SetActive(true);
+        }
 
-        oPosition.x -= transform.position.x - camera.transform.position.x;
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Anim.GetBool("Bend"))
+        {
+            Index = Idle;
+            Anim.SetBool("Bend", false);
+            tpscamera.SetActive(false);
+        }
+        
+
+        if (Anim.GetBool("Hide"))
+        {
+            Vector3 mPosition = Input.mousePosition;
+            Vector3 oPosition = transform.position;
+
+            oPosition.x -= transform.position.x - Hidecamera.transform.position.x;
 
 
-        //카메라가 앞면에서 뒤로 보고 있기 때문에, 마우스 position의 z축 정보에 
-        //게임 오브젝트와 카메라와의 z축의 차이를 입력시켜줘야 합니다.        
-        mPosition.z = oPosition.z - camera.transform.position.z;
+            //카메라가 앞면에서 뒤로 보고 있기 때문에, 마우스 position의 z축 정보에 
+            //게임 오브젝트와 카메라와의 z축의 차이를 입력시켜줘야 합니다.        
+            mPosition.z = oPosition.z - Hidecamera.transform.position.z;
 
-        //화면의 픽셀별로 변화되는 마우스의 좌표를 유니티의 좌표로 변화해 줘야 합니다.
-        //그래야, 위치를 찾아갈 수 있겠습니다.
-        Vector3 target = camera.ScreenToWorldPoint(mPosition);
+            //화면의 픽셀별로 변화되는 마우스의 좌표를 유니티의 좌표로 변화해 줘야 합니다.
+            //그래야, 위치를 찾아갈 수 있겠습니다.
+            Vector3 target = Hidecamera.GetComponent<Camera>().ScreenToWorldPoint(mPosition);
 
-        //다음은 아크탄젠트(arctan, 역탄젠트)로 게임 오브젝트의 좌표와 마우스 포인트의 좌표를
-        //이용하여 각도를 구한 후, 오일러(Euler)회전 함수를 사용하여 게임 오브젝트를 회전시키기
-        //위해, 각 축의 거리차를 구한 후 오일러 회전함수에 적용시킵니다.
+            //다음은 아크탄젠트(arctan, 역탄젠트)로 게임 오브젝트의 좌표와 마우스 포인트의 좌표를
+            //이용하여 각도를 구한 후, 오일러(Euler)회전 함수를 사용하여 게임 오브젝트를 회전시키기
+            //위해, 각 축의 거리차를 구한 후 오일러 회전함수에 적용시킵니다.
 
-        //우선 각 축의 거리를 계산하여, dy, dx에 저장해 둡니다.
-        float dy = target.y - oPosition.y;
-        float dx = target.x - oPosition.x;
+            //우선 각 축의 거리를 계산하여, dy, dx에 저장해 둡니다.
+            float dy = target.y - oPosition.y;
+            float dx = target.x - oPosition.x;
 
-        //오릴러 회전 함수를 0에서 180 또는 0에서 -180의 각도를 입력 받는데 반하여
-        //(물론 270과 같은 값의 입력도 전혀 문제없습니다.) 아크탄젠트 Atan2()함수의 결과 값은 
-        //라디안 값(180도가 파이(3.141592654...)로)으로 출력되므로
-        //라디안 값을 각도로 변화하기 위해 Rad2Deg를 곱해주어야 각도가 됩니다.
-        float rotateDegree = Mathf.Atan2(dx, dy) * Mathf.Rad2Deg;
+            //오릴러 회전 함수를 0에서 180 또는 0에서 -180의 각도를 입력 받는데 반하여
+            //(물론 270과 같은 값의 입력도 전혀 문제없습니다.) 아크탄젠트 Atan2()함수의 결과 값은 
+            //라디안 값(180도가 파이(3.141592654...)로)으로 출력되므로
+            //라디안 값을 각도로 변화하기 위해 Rad2Deg를 곱해주어야 각도가 됩니다.
+            float rotateDegree = Mathf.Atan2(dx, dy) * Mathf.Rad2Deg;
 
-        //구해진 각도를 오일러 회전 함수에 적용하여 z축을 기준으로 게임 오브젝트를 회전시킵니다.
-        transform.rotation = Quaternion.Euler(0.0f, rotateDegree, 0.0f);
-        */
-
+            //구해진 각도를 오일러 회전 함수에 적용하여 z축을 기준으로 게임 오브젝트를 회전시킵니다.
+            transform.rotation = Quaternion.Euler(0.0f, rotateDegree, 0.0f);
+        }
 
         float axis = Input.GetAxis("Horizontal");
         float vertice = Input.GetAxis("Vertical");
@@ -254,13 +295,6 @@ public class PlayerController : MonoBehaviour
 
         transform.Translate(move);
         transform.Translate(moveAmout);
-
-        
-
-
-
-
-
     }
 
     IEnumerator DeleteWalk()
@@ -280,12 +314,19 @@ public class PlayerController : MonoBehaviour
     {
         Target = _Obj;
     }
+    public void SetIndex(int _index)
+    {
+        Index = _index;
+    }
 
     public void SetHP(int _HP)
     {
         HP = _HP;
     }
-
+    public int GetIndex()
+    {
+        return Index;
+    }
     public int GetHP()
     {
         return HP;

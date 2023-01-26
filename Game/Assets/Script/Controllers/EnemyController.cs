@@ -53,19 +53,21 @@ public class EnemyController : MonoBehaviour
     {       
 
         int cntLoop = 0;
+        int cntLoop2 = 0;
         if (Anim.GetCurrentAnimatorStateInfo(0).IsName("¶óÀÌÆ®ÈÅ"))
         {
             float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
             float currentState = normalizedTime - Mathf.Floor(normalizedTime);
 
-            if (currentState >= 0.55f && Anim.GetBool("Attack"))
+            if (currentState >= 0.65f && Anim.GetBool("Attack") && cntLoop2 < normalizedTime)
             {
                 PlayerController P = Target.GetComponent<PlayerController>();
                 Anim.SetBool("Attack", false);
-                P.SetHP(P.GetHP() - 30);
+                P.SetHP(P.GetHP() - 25);
                 if (Index == Fight)
                     StartCoroutine(Punch());
                 P.Anim.SetTrigger("Hit");
+                cntLoop2 += 1;
             }
         }
 
@@ -99,7 +101,7 @@ public class EnemyController : MonoBehaviour
             Anim.SetBool("Die", true);
         }
 
-        if (Target != null && Index != Die)
+        if (Target != null && (Index != Die && Index != Stun))
         {
             Index = Fight;
             Anim.SetBool("Fight", true);
@@ -141,7 +143,7 @@ public class EnemyController : MonoBehaviour
 
     IEnumerator Punch()
     {
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(2.0f);
        
         Anim.SetBool("Attack", true);            
         

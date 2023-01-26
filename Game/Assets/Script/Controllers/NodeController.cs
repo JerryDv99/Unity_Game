@@ -32,16 +32,27 @@ public class NodeController : MonoBehaviour
             this.transform.position += (dir.normalized * Time.deltaTime * 2.0f);
 
             float fDistance = Vector3.Distance(transform.position, Target.transform.position);
+                        
 
-            if (fDistance < 0.1f)
+            if (fDistance < 0.2f)
             {
+                if (Target.next == null)
+                {
+                    E.SetIndex(0);
+                    E.Anim.SetBool("Chase", false);
+                    E.Anim.SetBool("Doubt", false);
+                    E.Anim.SetBool("Walk", false);
+                }
                 OldTarget = Target;
                 Target = Target.next;
             }
 
+            
             Vector3 V1 = (Target.transform.position - transform.position).normalized;
             V1.y = 0;
+            
             transform.LookAt(transform.position + V1);
-        }        
+
+        }
     }
 }

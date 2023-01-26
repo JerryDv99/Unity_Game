@@ -8,6 +8,7 @@ public class Quack : MonoBehaviour
     GameObject Point;
     private void OnTriggerEnter(Collider other)
     {
+        StartCoroutine(DestroySelf());
         if(!create)
         {
             Point = new GameObject("0");
@@ -27,5 +28,14 @@ public class Quack : MonoBehaviour
             E.Anim.SetBool("Chase", true);
             E.gameObject.GetComponent<NodeController>().SetTarget(node);
         }
+    }
+
+    IEnumerator DestroySelf()
+    {
+        yield return new WaitForSeconds(1.5f);
+
+        Destroy(this.gameObject);
+
+        yield return null;
     }
 }
