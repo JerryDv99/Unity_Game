@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
     public GameObject Actioncamera;
     public GameObject Hidecamera;
 
+    [SerializeField] GameObject Present;
+
     public Animator Anim;
 
     const int Idle = 0;
@@ -28,6 +30,7 @@ public class PlayerController : MonoBehaviour
     const int Hide = 3;
     const int Fight = 4;
     const int Die = 5;
+    const int Gift = 6;
 
     [SerializeField] int HP;
     int Index;
@@ -48,6 +51,7 @@ public class PlayerController : MonoBehaviour
         tpscamera.SetActive(false);
         Actioncamera.SetActive(false);
         Hidecamera.SetActive(false);
+        Present.SetActive(false);
 
         GameObject obj = new GameObject();
         obj.transform.SetParent(this.transform);
@@ -192,30 +196,55 @@ public class PlayerController : MonoBehaviour
             
         }
 
+        if (Anim.GetCurrentAnimatorStateInfo(0).IsName("선물 주기"))
+        {
+            float normalizedTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            float currentState = normalizedTime - Mathf.Floor(normalizedTime);
+
+            Actioncamera.SetActive(true);
+
+            NPCController N = Target.GetComponent<NPCController>();
+            if (currentState < 0.1f)
+                Present.SetActive(true);
+            if(currentState >= 0.75f)
+            {
+                Present.SetActive(false);
+                N.Anim.SetBool("Hold", true);                
+            }
+        }
+
         if (Target)
         {
-            EnemyController E = Target.GetComponent<EnemyController>();
-            if (E.GetTarget() == this.gameObject)
+            if (Target.tag == "Enemy")
             {
-                Index = Fight;
-                Anim.SetBool("Walk", false);
-                Anim.SetBool("Fight", true);
-                if(!E.Anim.GetBool("Stun") && !E.Anim.GetBool("Die"))
-                    transform.LookAt(Target.transform);
-            }
-            if (E.GetTarget() == null)
-            {
-                if(Input.GetKeyDown(KeyCode.Space))
+                EnemyController E = Target.GetComponent<EnemyController>();
+                if (E.GetTarget() == this.gameObject)
                 {
-                    Anim.SetBool("Attack2", true);
+                    Index = Fight;
+                    Anim.SetBool("Walk", false);
+                    Anim.SetBool("Fight", true);
+                    if (!E.Anim.GetBool("Stun") && !E.Anim.GetBool("Die"))
+                        transform.LookAt(Target.transform);
+                }
+                if (E.GetTarget() == null)
+                {
+                    if (Input.GetKeyDown(KeyCode.Space))
+                    {
+                        Anim.SetBool("Attack2", true);
 
+                    }
+                }
+                if (E.GetHP() <= 0)
+                {
+                    Target = null;
+                    Index = Idle;
+                    Anim.SetBool("Fight", false);
                 }
             }
-            if (E.GetHP() <= 0)
+
+            if(Target.tag == "NPC")
             {
-                Target = null;
-                Index = Idle;
-                Anim.SetBool("Fight", false);
+                Index = Gift;
             }
         }
 
@@ -251,7 +280,10 @@ public class PlayerController : MonoBehaviour
             Anim.SetBool("Bend", false);
             tpscamera.SetActive(false);
         }
-        
+
+        if (Input.GetKeyDown(KeyCode.G) && Index == Gift)
+            Anim.SetBool("Gift", true);
+
 
         if (Anim.GetBool("Hide"))
         {

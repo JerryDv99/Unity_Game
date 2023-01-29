@@ -18,12 +18,13 @@ public class NodeController : MonoBehaviour
        
     void Start()
     {
-        Transform trans = transform.parent.transform;
+        Transform trans = transform.parent.transform;        
         Target = trans.Find("NodeList").GetChild(0).GetComponent<Node>();
     }
 
     void Update()
     {
+
         EnemyController E = this.transform.GetComponent<EnemyController>();
         if (E.GetIndex() == 1 || E.GetIndex() == 2)
         {
@@ -48,10 +49,14 @@ public class NodeController : MonoBehaviour
             }
 
             
-            Vector3 V1 = (Target.transform.position - transform.position).normalized;
-            V1.y = 0;
+            if(fDistance > 0.2f)
+            {
+                Vector3 V1 = (Target.transform.position - transform.position).normalized;
+                V1.y = 0;
+
+                transform.LookAt(transform.position + V1);
+            }
             
-            transform.LookAt(transform.position + V1);
 
         }
     }

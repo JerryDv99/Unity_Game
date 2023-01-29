@@ -107,6 +107,9 @@ public class MyFieldOfView : MonoBehaviour
             {
                 if (TargetList.Find(x => x.transform).gameObject.tag == "Enemy")
                     this.transform.GetComponent<PlayerController>().SetTarget(TargetList.Find(x => x.transform).gameObject);
+                if (TargetList.Find(x => x.transform).gameObject.tag == "NPC")
+                    this.transform.GetComponent<PlayerController>().SetTarget(TargetList.Find(x => x.transform).gameObject);
+                
             }            
         }
         
