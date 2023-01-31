@@ -37,8 +37,6 @@ public class LoadingController : MonoBehaviour
         {
             yield return null;
 
-            
-
             if (Aop.progress < Crossline)
                 ProgressBar.fillAmount = Aop.progress;
             else
